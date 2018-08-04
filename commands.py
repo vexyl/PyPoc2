@@ -8,6 +8,17 @@ def register_command(command, function, argumentNum, permissionLevel, helpString
     commands[command] = [ function, argumentNum, permissionLevel, helpString ]
 
 def command_handle_help(player, args, proto_inst):
+    if (len(args) > 0):
+        commandName = args[0]
+
+        if (not commandName in commands):
+            player.add_packet(helpers.gen_chat_packet("No such command: " + commandName, 0))
+            return
+
+        helpString = commands[commandName][3]
+        player.add_packet(helpers.gen_chat_packet(helpString, 0))
+        return
+
     player.add_packet(helpers.gen_chat_packet("--- Commands: ---", 0))
     for key, value in commands.items():
         helpString = value[3]
@@ -101,7 +112,7 @@ def register_command(command, function, argumentNum, permissionLevel, helpString
 
 def handle_command(player, commandName, args, proto_inst):
     if (not commandName in commands):
-        print("No such command:", commandName)
+        player.add_packet(helpers.gen_chat_packet("No such command: " + commandName, 0))
         return
 
     command = commands[commandName]
@@ -115,10 +126,8 @@ def handle_command(player, commandName, args, proto_inst):
         return
 
     if (len(args) < argumentNum):
-        print("Not enough arguments")
+        command_handle_help(player, [commandName], proto_inst)
         return
-
-    # TODO: Check client permission
 
     # Call command function
     function(player, args, proto_inst)
